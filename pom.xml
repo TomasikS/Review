@@ -9,7 +9,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>12</maven.compiler.source>
         <maven.compiler.target>12</maven.compiler.target>
-        <restlet-version>2.3.7</restlet-version> 
+        <restlet-version>2.4.2</restlet-version> 
     </properties>
     
     <repositories> 
