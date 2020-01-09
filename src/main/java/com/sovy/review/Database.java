@@ -30,7 +30,7 @@ public class Database {
         Properties properties = new Properties();
         properties.load(new java.io.FileInputStream("C://Users//stefan.tomasik//Documents//NetBeansProjects//Review//src//main//java//com//sovy//review//application.properties"));
         String url = properties.getProperty("host");
-        String user = properties.getProperty("username");;
+        String user = properties.getProperty("username");
         String password = properties.getProperty("password");
         String driver = properties.getProperty("driver");
         Class.forName(driver);
@@ -41,10 +41,10 @@ public class Database {
 
     public List readData() throws SQLException, IOException {
 
+        Connection connection = null;
         String sql = "SELECT * from review;";
 
         // Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/bookstore", "postgres", "postgres");
-        Connection connection = null;
         try {
             connection = createConnection();
         } catch (ClassNotFoundException ex) {
@@ -62,21 +62,24 @@ public class Database {
                 int id = rs.getInt("id");
                 String text = rs.getString("text");
                 int hodnotenie = rs.getInt("hodnotenie");
-                zaners.add(new Review( (long)id, text, hodnotenie));
+                int idBook = rs.getInt("idBook");
+                int idUser = rs.getInt("idUser");
+
+                zaners.add(new Review((long) id, text, hodnotenie, idBook, idUser));
             }
         }
         connection.close();
         return zaners;
     }
 
-    public void insertData(Review meno) throws SQLException, IOException, ClassNotFoundException {
+    public void insertData(Review review) throws SQLException, IOException, ClassNotFoundException {
         String sql = "INSERT INTO review (text,hodnotenie) VALUES (?, ?)";
         // Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/bookstore", "postgres", "postgres");
         Connection connection = createConnection();
         PreparedStatement statement = connection.prepareStatement(sql);
         // statement.setInt(1, id);
-        statement.setString(1, meno.getText());
-        statement.setInt(2, meno.getHodnotenie());
+        statement.setString(1, review.getText());
+        statement.setInt(2, review.getHodnotenie());
 
         int rowsInserted = statement.executeUpdate();
         if (rowsInserted > 0) {
@@ -103,13 +106,48 @@ public class Database {
 
     }
 
-    public Review getZanerById (Long id) throws IOException, SQLException, FileNotFoundException, ClassNotFoundException {
+    public Review getZanerById(Long id) throws IOException, SQLException, FileNotFoundException, ClassNotFoundException {
         /* String url = "jdbc:postgresql://localhost:5432/bookstore";
         String user = "postgres";
         String password = "postgres";*/
-
-        String query = "select *  from review where id=" + id;
+        
+        List<Review> reviewList=new ArrayList();
         Review zaner = null;
+        Long idKniha = null;
+        List<Long> list = new ArrayList();
+
+        String dopyt = "SELECT id from Book where id>0;";
+        Connection connectionBook = createConnection();
+        PreparedStatement preparedStatementBook = connectionBook.prepareStatement(dopyt);
+        ResultSet rss = preparedStatementBook.executeQuery();
+
+        while (rss.next()) {
+            idKniha = rss.getLong(1);
+            list.add(idKniha);
+        }
+        
+        
+            connectionBook.close();
+
+        Long idUsera = null;
+        List<Long> listUser = new ArrayList();
+
+        String dopytPouzivatel = "SELECT id from Pouzivatel where id>0;";
+        Connection connectionUser= createConnection();
+        PreparedStatement preparedStatementUser = connectionUser.prepareStatement(dopytPouzivatel);
+        ResultSet rsss = preparedStatementUser.executeQuery();
+
+        while (rsss.next()) {
+            idUsera = rsss.getLong(1);
+            listUser.add(idUsera);
+        }
+        
+         connectionUser.close();
+        
+
+        // if (idKniha != null) {
+        String query = "select *  from review where id=" + id;
+
         try (Connection connection = createConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query);) {
             ResultSet rs = preparedStatement.executeQuery();
@@ -118,12 +156,28 @@ public class Database {
                 Long idzaner = rs.getLong(1);
                 String name = rs.getString(2);
                 int hodnotenie = rs.getInt(3);
-                zaner = (new Review(idzaner, name, hodnotenie));
+                int idBook = rs.getInt(4);
+                int idUser = rs.getInt(5);
+                zaner = (new Review(idzaner, name, hodnotenie, idBook, idUser));
+                reviewList.add(zaner);
             }
+
+            connection.close();
+
         } catch (SQLException ex) {
             Logger.getLogger(Database.class.getName()).log(Level.SEVERE, "Cannot connect to database " + ex.getMessage(), ex);
         }
-
+        
+        int j=0;
+        for(int i=0;i<reviewList.size();i++)
+        {
+        
+        if((reviewList.get(i).getIdUser()==listUser.get(i)) && (reviewList.get(i).getIdBook()==list.get(i)))
+        j=i;
+        }
+        
+        zaner=reviewList.get(j);
+        // }
         return zaner;
     }
 
@@ -131,7 +185,7 @@ public class Database {
         /*  String url = "jdbc:postgresql://localhost:5432/bookstore";
         String user = "postgres";
         String password = "postgres";*/
-      
+
         String sql = "update review set text = '" + zaner.getText() + "'where id=" + zaner.getId();
 
         try (Connection conn = createConnection();
@@ -142,7 +196,6 @@ public class Database {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
     }
 
 }

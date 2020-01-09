@@ -11,20 +11,36 @@ import java.io.Serializable;
  *
  * @author stefan.tomasik
  */
-
 public class Review implements Serializable {
 
-  
-    Long id;
+    public Review(Long id, String text, int hodnotenie, int idBook, int idUser) {
+        this.id = id;
+        this.text = text;
+        this.hodnotenie = hodnotenie;
+        this.idBook = idBook;
+        this.idUser = idUser;
+    }
 
-    String text;
+    private Long id;
+    private String text;
+    private int hodnotenie;
+    private int idBook;
+    private int idUser;
 
-    int hodnotenie;
+    public int getIdBook() {
+        return idBook;
+    }
 
-    Review(Long id, String text, int hodnotenie) {
- this.id=id;
- this.text=text;
- this.hodnotenie=hodnotenie;
+    public void setIdBook(int idBook) {
+        this.idBook = idBook;
+    }
+
+    public int getIdUser() {
+        return idUser;
+    }
+
+    public void setIdUser(int idUser) {
+        this.idUser = idUser;
     }
 
     public Long getId() {
@@ -50,7 +66,9 @@ public class Review implements Serializable {
     public void setHodnotenie(int hodnotenie) {
         this.hodnotenie = hodnotenie;
     }
-    
-    public Review(){};
-    
+
+    public Review() {
+    }
+;
+
 }
