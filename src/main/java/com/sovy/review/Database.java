@@ -28,7 +28,13 @@ public class Database {
     public Connection createConnection() throws SQLException, ClassNotFoundException, FileNotFoundException, IOException {
         Connection connection;
         Properties properties = new Properties();
-        properties.load(new java.io.FileInputStream("C://Users//stefan.tomasik//Documents//NetBeansProjects//Review//src//main//java//com//sovy//review//application.properties"));
+
+        String currentWorkingDir = System.getProperty("user.dir");
+        String subor = currentWorkingDir + "/src//main//java//com//sovy//review//application.properties";
+
+        ///   System.out.println("pom vypis"+subor);
+        //properties.load(new java.io.FileInputStream("C://Users//stefan.tomasik//Documents//NetBeansProjects//Review//src//main//java//com//sovy//review//application.properties"));
+        properties.load(new java.io.FileInputStream(subor));
         String url = properties.getProperty("host");
         String user = properties.getProperty("username");
         String password = properties.getProperty("password");
@@ -110,8 +116,8 @@ public class Database {
         /* String url = "jdbc:postgresql://localhost:5432/bookstore";
         String user = "postgres";
         String password = "postgres";*/
-        
-        List<Review> reviewList=new ArrayList();
+
+        List<Review> reviewList = new ArrayList();
         Review zaner = null;
         Long idKniha = null;
         List<Long> list = new ArrayList();
@@ -125,15 +131,14 @@ public class Database {
             idKniha = rss.getLong(1);
             list.add(idKniha);
         }
-        
-        
-            connectionBook.close();
+
+        connectionBook.close();
 
         Long idUsera = null;
         List<Long> listUser = new ArrayList();
 
         String dopytPouzivatel = "SELECT id from Pouzivatel where id>0;";
-        Connection connectionUser= createConnection();
+        Connection connectionUser = createConnection();
         PreparedStatement preparedStatementUser = connectionUser.prepareStatement(dopytPouzivatel);
         ResultSet rsss = preparedStatementUser.executeQuery();
 
@@ -141,9 +146,8 @@ public class Database {
             idUsera = rsss.getLong(1);
             listUser.add(idUsera);
         }
-        
-         connectionUser.close();
-        
+
+        connectionUser.close();
 
         // if (idKniha != null) {
         String query = "select *  from review where id=" + id;
@@ -167,17 +171,21 @@ public class Database {
         } catch (SQLException ex) {
             Logger.getLogger(Database.class.getName()).log(Level.SEVERE, "Cannot connect to database " + ex.getMessage(), ex);
         }
-        
-        int j=0;
-        for(int i=0;i<reviewList.size();i++)
-        {
-        
-        if((reviewList.get(i).getIdUser()==listUser.get(i)) && (reviewList.get(i).getIdBook()==list.get(i)))
-        j=i;
+
+        int j = 0;
+        for (int i = 0; i < reviewList.size(); i++) {
+
+            if ((reviewList.get(i).getIdUser() == listUser.get(i)) && (reviewList.get(i).getIdBook() == list.get(i))) {
+                j = i;
+            }
         }
-        
-        zaner=reviewList.get(j);
-        // }
+
+        if (reviewList.size() > 0) {
+            zaner = reviewList.get(j);
+        } else {
+            zaner = reviewList.get(0);
+        }
+
         return zaner;
     }
 
